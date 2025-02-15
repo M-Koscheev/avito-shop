@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	authorizationHeader = "Authorization"
-	contextEmployeeId   = "employeeId"
+	authorizationHeader     = "Authorization"
+	contextEmployeeUsername = "employeeUsername"
 )
 
 func (h *Handler) employeeIdentity(c *gin.Context) {
@@ -30,14 +30,14 @@ func (h *Handler) employeeIdentity(c *gin.Context) {
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
 		return []byte(secret), nil
 	})
 
 	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, fmt.Errorf("token not transferred"))
+		c.AbortWithError(http.StatusUnauthorized, fmt.Errorf("token not transferred: %w", err))
 		return
 	}
 
@@ -59,25 +59,31 @@ func (h *Handler) employeeIdentity(c *gin.Context) {
 		return
 	}
 
-	employeeId := int(claims["id"].(float64))
-	if employeeId <= 0 {
-		c.AbortWithError(http.StatusUnauthorized, fmt.Errorf("invalid employee ID"))
+	employeeUsername := claims["username"]
+	if employeeUsername == "" {
+		c.AbortWithError(http.StatusUnauthorized, fmt.Errorf("invalid employee username"))
 		return
 	}
 
-	c.Set(contextEmployeeId, employeeId)
+	c.Set(contextEmployeeUsername, employeeUsername)
 }
 
-func getEmployeeId(c *gin.Context) (int, error) {
-	idString, ok := c.Get(contextEmployeeId)
+func getEmployeeUsername(c *gin.Context) (string, error) {
+	username, ok := c.Get(contextEmployeeUsername)
 	if !ok {
-		return 0, fmt.Errorf("no id present in context")
+		return "", fmt.Errorf("no username present in context")
 	}
 
-	id, ok := idString.(int)
+	usernameStr, ok := username.(string)
 	if !ok {
-		return 0, fmt.Errorf("wrong id format")
+		return "", fmt.Errorf("wrong username format")
 	}
 
-	return id, nil
+	return usernameStr, nil
 }
+
+//func loggingMiddleware(w http.ResponseWriter, r *http.Request) http.Handler {
+//	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+//
+//	})
+//}

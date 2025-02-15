@@ -22,39 +22,40 @@ VALUES
     ('pink-hoody'::productTitle, 500);
 
 CREATE TABLE "employees" (
-    "id" serial PRIMARY KEY,
-    "username" varchar NOT NULL,
-    "password" varchar NOT NULL,
+--     "id" serial PRIMARY KEY,
+    "username" varchar PRIMARY KEY,
+    "password_hash" bytea NOT NULL,
     "balance" int NOT NULL CHECK (balance >= 0) DEFAULT (1000)
 );
 
--- индекс для ускорения поиска по имени пользователя сотрудника
-CREATE INDEX employees_username_idx
-ON employees(username);
+-- -- индекс для ускорения поиска по имени пользователя сотрудника
+-- CREATE INDEX employees_username_idx
+-- ON employees(username);
 
 CREATE TABLE "coin_transactions" (
     "id" serial PRIMARY KEY,
-    "from_employee_id" int REFERENCES employees(id),
-    "to_employee_id" int REFERENCES employees(id),
+    "from_employee" varchar REFERENCES employees(username),
+    "to_employee" varchar REFERENCES employees(username),
     "amount" int CHECK (amount > 0),
     "date" timestamp NOT NULL
 );
 
 -- индекс для ускорения поиска по имени пользователя сотрудника который передает монеты
-CREATE INDEX coin_transactions_from_employee_id_idx
-ON coin_transactions(from_employee_id);
+CREATE INDEX coin_transactions_from_employee_idx
+ON coin_transactions(from_employee);
 
 -- индекс для ускорения поиска по имени пользователя сотрудника которому передаются монеты
-CREATE INDEX coin_transactions_to_employee_id_idx
-ON coin_transactions(to_employee_id);
+CREATE INDEX coin_transactions_to_employee_idx
+ON coin_transactions(to_employee);
 
 CREATE TABLE "purchases" (
-     "id" serial PRIMARY KEY,
-     "employee_id" int REFERENCES employees(id),
-     "product_id" int REFERENCES products(id),
-     "date" timestamp NOT NULL
+    "employee" varchar REFERENCES employees(username),
+    "product_id" int REFERENCES products(id),
+    "amount" int NOT NULL,
+
+    PRIMARY KEY (employee, product_id)
 );
 
--- индекс для ускорения поиска по айди пользователя сотрудника при выводе информации о купленном мерче
-CREATE INDEX purchases_employee_id_idx
-ON purchases(employee_id);
+-- индекс для ускорения поиска по имени пользователя сотрудника при выводе информации о купленном мерче
+CREATE INDEX purchases_employee_idx
+ON purchases(employee);

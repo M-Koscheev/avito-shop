@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   avito-shop-service:
     build: .
@@ -9,28 +7,28 @@ services:
     environment:
       # енвы подключения к БД
       - DATABASE_PORT=5432
-      - DATABASE_USER=${POSTGRES_USER}
+      - DATABASE_USER=postgres
       - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
       - DATABASE_NAME=${POSTGRES_DB}
-      - DATABASE_HOST=db
-       порт сервиса
+      - DATABASE_HOST=avito_shop_db
+#       порт сервиса
       - SERVER_PORT=8080
     depends_on:
-      db:
+      avito-shop-db:
         condition: service_healthy
     networks:
       - internal
 
-  db:
+  avito-shop-db:
     image: postgres:13
-    container_name: postgres
+    container_name: avito-shop-db
+    user: postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+#      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     volumes:
-      # "./migrations/init.sql" - путь к миграциям БД
-      - ./db/migrations/init_schema.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./db/migrations/000001_init_schema.up.sql:/docker-entrypoint-initdb.d/init_schema.sql
     ports:
       - "5432:5432"
     healthcheck:

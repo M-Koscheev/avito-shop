@@ -9,22 +9,364 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "contact": {
+            "name": "API Support",
+            "email": "mr.kosheef54@gmail.com"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {}
+    "paths": {
+        "/auth": {
+            "post": {
+                "description": "Аутентификация пользователя для дальнейшего использования сервиса",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Аутентификация и получение JWT-токена.",
+                "operationId": "auth",
+                "parameters": [
+                    {
+                        "description": "Данные для аутентификации.",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/db.AuthRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Аутентификация и получение JWT-токена.",
+                        "schema": {
+                            "$ref": "#/definitions/db.AuthResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный запрос.",
+                        "schema": {
+                            "$ref": "#/definitions/db.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизован.",
+                        "schema": {
+                            "$ref": "#/definitions/db.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера.",
+                        "schema": {
+                            "$ref": "#/definitions/db.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/buy/{item}": {
+            "get": {
+                "description": "Купить предмет за монеты.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "items"
+                ],
+                "summary": "Купить предмет за монеты.",
+                "operationId": "buy-item",
+                "parameters": [
+                    {
+                        "enum": [
+                            "t-shirt",
+                            "cup",
+                            "book",
+                            "pen",
+                            "powerbank",
+                            "hoody",
+                            "umbrella",
+                            "socks",
+                            "wallet",
+                            "pink-hoody"
+                        ],
+                        "type": "string",
+                        "description": "Название предмета.",
+                        "name": "item",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный запрос.",
+                        "schema": {
+                            "$ref": "#/definitions/db.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизован.",
+                        "schema": {
+                            "$ref": "#/definitions/db.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера.",
+                        "schema": {
+                            "$ref": "#/definitions/db.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/info": {
+            "get": {
+                "description": "Получить информацию о монетах, инвентаре и истории транзакций авторизированного сотрудника.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "info"
+                ],
+                "summary": "Получить информацию о монетах, инвентаре и истории транзакций.",
+                "operationId": "info",
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ.",
+                        "schema": {
+                            "$ref": "#/definitions/db.InfoResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный запрос.",
+                        "schema": {
+                            "$ref": "#/definitions/db.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизован.",
+                        "schema": {
+                            "$ref": "#/definitions/db.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера.",
+                        "schema": {
+                            "$ref": "#/definitions/db.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/sendCoin": {
+            "post": {
+                "description": "Отправить монеты указанному пользователю.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "coins"
+                ],
+                "summary": "Отправить монеты другому пользователю.",
+                "operationId": "send-coins",
+                "parameters": [
+                    {
+                        "description": "Данные о пользователе и количестве монет.",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/db.SendCoinRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный запрос.",
+                        "schema": {
+                            "$ref": "#/definitions/db.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизован.",
+                        "schema": {
+                            "$ref": "#/definitions/db.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера.",
+                        "schema": {
+                            "$ref": "#/definitions/db.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "db.AuthRequest": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "db.AuthResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "db.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "string"
+                }
+            }
+        },
+        "db.InfoResponse": {
+            "type": "object",
+            "properties": {
+                "coinHistory": {
+                    "type": "object",
+                    "properties": {
+                        "received": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "amount": {
+                                        "type": "integer"
+                                    },
+                                    "fromUser": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "sent": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "amount": {
+                                        "type": "integer"
+                                    },
+                                    "toUser": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "coins": {
+                    "type": "integer"
+                },
+                "inventory": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "quantity": {
+                                "type": "integer"
+                            },
+                            "type": {
+                                "$ref": "#/definitions/db.Merch"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "db.Merch": {
+            "type": "string",
+            "enum": [
+                "t-shirt",
+                "cup",
+                "book",
+                "pen",
+                "powerbank",
+                "hoody",
+                "umbrella",
+                "socks",
+                "wallet",
+                "pink-hoody"
+            ],
+            "x-enum-varnames": [
+                "TShirt",
+                "Cup",
+                "Book",
+                "Pen",
+                "Powerbank",
+                "Hoody",
+                "Umbrella",
+                "Socks",
+                "Wallet",
+                "PinkHoody"
+            ]
+        },
+        "db.SendCoinRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "toUser": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "description": "Type \"Bearer\" followed by a space and JWT token.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
-	Host:             "",
-	BasePath:         "",
-	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Version:          "1.0",
+	Host:             "localhost:8080",
+	BasePath:         "/api",
+	Schemes:          []string{"http"},
+	Title:            "Avito-shop API",
+	Description:      "API for inner Avito merch shop.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

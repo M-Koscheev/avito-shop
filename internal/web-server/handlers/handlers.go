@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	_ "avito-shop/docs"
-	"avito-shop/internal/service"
+	_ "github.com/M-Koscheev/avito-shop/docs"
+	"github.com/M-Koscheev/avito-shop/internal/web-server/services"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
@@ -10,10 +10,10 @@ import (
 )
 
 type Handler struct {
-	Services *service.Service
+	Services *services.Service
 }
 
-func NewHandler(services *service.Service) *Handler {
+func NewHandler(services *services.Service) *Handler {
 	return &Handler{Services: services}
 }
 
@@ -21,6 +21,12 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 
 	// TODO узнать нужно ли тут CORSMiddleware
+
+	// TODO graceful shutdown
+
+	// TODO logger
+
+	// TODO make repository private
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.GET("/", func(c *gin.Context) {
@@ -31,10 +37,10 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	api := router.Group("/api")
 	{
-		auth := api.POST("/auth")
-		buy := api.GET("/buy/:item", h.employeeIdentity)
-		sendCoin := api.POST("/sendCoin", h.employeeIdentity)
-		info := api.GET("/info", h.employeeIdentity)
+		api.POST("/auth", h.authenticateEmployee)
+		api.GET("/buy/:item", h.employeeIdentity, h.buyMerch)
+		api.POST("/sendCoin", h.employeeIdentity, h.sendCoin)
+		api.GET("/info", h.employeeIdentity, h.getInfo)
 	}
 
 	return router

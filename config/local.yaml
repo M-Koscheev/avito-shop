@@ -1,0 +1,14 @@
+env: "local"
+db:
+  username: "postgres"
+  host: "avito-shop-db"
+  port: "5432"
+  db_name: "shop"
+  ssl_mode: "disable"
+
+server:
+  address: ":8080"
+  timeout: 4s
+  idle_timeout: 60s
+  max_header_bytes: 1048576
+

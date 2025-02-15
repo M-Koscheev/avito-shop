@@ -1,17 +1,17 @@
-DROP TABLE "products";
+DROP INDEX IF EXISTS "purchases_employee_idx";
 
-DROP TYPE "productTitle";
+DROP TABLE IF EXISTS "purchases";
 
-DROP INDEX "employees_username_idx";
+DROP TABLE IF EXISTS "products";
 
-DROP TABLE "employees";
+DROP TYPE IF EXISTS "productTitle";
 
-DROP INDEX "coin_transactions";
+-- DROP INDEX "employees_username_idx";
 
-DROP INDEX "coin_transactions_from_employee_id_idx";
+DROP TABLE IF EXISTS "employees";
 
-DROP INDEX "coin_transactions_to_employee_id_idx";
+DROP INDEX IF EXISTS "coin_transactions";
 
-DROP INDEX "purchases_employee_id_idx";
+DROP INDEX IF EXISTS "coin_transactions_from_employee_idx";
 
-DROP TABLE "purchases";
+DROP INDEX IF EXISTS "coin_transactions_to_employee_idx";
