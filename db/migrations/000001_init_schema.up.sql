@@ -4,16 +4,16 @@ CREATE TABLE "products" (
     "price" integer NOT NULL CHECK (price >= 0)
 );
 
+-- индекс для ускорения поиска по названию продукта
+CREATE INDEX products_title_idx
+ON products(title);
+
 CREATE TABLE "employees" (
 --     "id" serial PRIMARY KEY,
     "username" varchar PRIMARY KEY,
     "password_hash" bytea NOT NULL,
     "balance" int NOT NULL CHECK (balance >= 0) DEFAULT (1000)
 );
-
--- -- индекс для ускорения поиска по имени пользователя сотрудника
--- CREATE INDEX employees_username_idx
--- ON employees(username);
 
 CREATE TABLE "coin_transactions" (
     "id" serial PRIMARY KEY,

@@ -65,7 +65,7 @@ func (s *AuthService) generateToken(username string) (string, error) {
 		username,
 	})
 
-	secret, exists := os.LookupEnv("JWT_SECRET_KEY")
+	secret, exists := os.LookupEnv("JWT_SECRET")
 	if !exists {
 		return "", fmt.Errorf("no jwt secret present in env file")
 	}

@@ -22,7 +22,7 @@ func (h *Handler) employeeIdentity(c *gin.Context) {
 		return
 	}
 
-	secret, exists := os.LookupEnv("JWT_SECRET_KEY")
+	secret, exists := os.LookupEnv("JWT_SECRET")
 	if !exists {
 		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get secret jwt key"))
 		return

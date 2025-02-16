@@ -38,7 +38,7 @@ func main() {
 		log.Fatalf("err loading env: %v", err)
 	}
 
-	gin.SetMode(gin.DebugMode)
+	gin.SetMode(gin.ReleaseMode)
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 

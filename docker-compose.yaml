@@ -7,7 +7,7 @@ services:
     environment:
       # енвы подключения к БД
       - DATABASE_PORT=5432
-      - DATABASE_USER=postgres
+      - DATABASE_USER=${POSTGRES_USER}
       - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
       - DATABASE_NAME=${POSTGRES_DB}
       - DATABASE_HOST=avito_shop_db
@@ -22,9 +22,8 @@ services:
   avito-shop-db:
     image: postgres:13
     container_name: avito-shop-db
-    user: postgres
+    user: ${POSTGRES_USER}
     environment:
-#      - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
     volumes:
