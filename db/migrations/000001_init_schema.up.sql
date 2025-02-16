@@ -1,25 +1,8 @@
-CREATE TYPE productTitle AS
-    enum ('t-shirt', 'cup', 'book', 'pen', 'powerbank',
-    'hoody', 'umbrella', 'socks', 'wallet', 'pink-hoody');
-
 CREATE TABLE "products" (
     "id" serial PRIMARY KEY,
-    "title" productTitle UNIQUE NOT NULL,
+    "title" varchar UNIQUE NOT NULL,
     "price" integer NOT NULL CHECK (price >= 0)
 );
-
-INSERT INTO "products" (title, price)
-VALUES
-    ('t-shirt'::productTitle, 80),
-    ('cup'::productTitle, 20),
-    ('book'::productTitle, 50),
-    ('pen'::productTitle, 10),
-    ('powerbank'::productTitle, 200),
-    ('hoody'::productTitle, 300),
-    ('umbrella'::productTitle, 200),
-    ('socks'::productTitle, 10),
-    ('wallet'::productTitle, 50),
-    ('pink-hoody'::productTitle, 500);
 
 CREATE TABLE "employees" (
 --     "id" serial PRIMARY KEY,

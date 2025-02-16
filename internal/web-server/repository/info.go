@@ -3,9 +3,11 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/M-Koscheev/avito-shop/db"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	"time"
 )
 
@@ -26,8 +28,7 @@ func (r *InfoRepository) GetInventory(ctx context.Context, username string) ([]d
 
 	rows, err := tx.Query(`SELECT products.title, purchases.amount FROM products 
                      INNER JOIN purchases ON purchases.product_id = products.id
-                     WHERE purchases.employee=$1
-                     ORDER BY purchases.date`, username)
+                     WHERE purchases.employee=$1`, username)
 	if err != nil {
 		return nil, fmt.Errorf("failed to select employee inventory: %w", err)
 	}
@@ -58,22 +59,37 @@ func (r *InfoRepository) PurchaseProduct(ctx context.Context, username string, p
 		return fmt.Errorf("failed to select employee balance: %w", err)
 	}
 
-	row = tx.QueryRow(`SELECT price FROM products WHERE title=$1::productTitle`, product)
-	var productPrice int
-	if err = row.Scan(&productPrice); err != nil {
+	row = tx.QueryRow(`SELECT price, id FROM products WHERE title=$1`, product)
+	var productPrice, productId int
+	if err = row.Scan(&productPrice, &productId); err != nil {
 		return fmt.Errorf("failed to select product price: %w", err)
 	}
 
 	if productPrice > balance {
-		return fmt.Errorf("not enough coind - need %v, but hanve only %v", productPrice, balance)
+		return db.InvalidRequestError{Message: fmt.Sprintf("not enough coind - need %v, but hanve only %v", productPrice, balance)}
 	}
 
-	res, err := tx.Exec(`UPDATE employees SET balance=balance-$1 WHERE username=$2`, balance-productPrice, username)
+	res, err := tx.Exec(`UPDATE employees SET balance=balance-$1 WHERE username=$2`, productPrice, username)
 	if err != nil {
 		return fmt.Errorf("failed to update employee balance: %w", err)
 	}
 
 	affected, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected info: %w", err)
+	}
+
+	if affected != 1 {
+		return fmt.Errorf("wrong amount of column affected - needed 1, but affected %v", affected)
+	}
+
+	res, err = tx.Exec(`INSERT INTO purchases (employee, product_id, amount) VALUES ($1, $2, 1) 
+            ON CONFLICT (employee, product_id) DO UPDATE SET amount=purchases.amount+1`, username, productId)
+	if err != nil {
+		return fmt.Errorf("failed to insert new purchase row: %w", err)
+	}
+
+	affected, err = res.RowsAffected()
 	if err != nil {
 		return fmt.Errorf("failed to get rows affected info: %w", err)
 	}
@@ -136,7 +152,7 @@ func (r *InfoRepository) SendCoins(ctx context.Context, fromUsername, toUsername
 	}
 
 	if amount > balance {
-		return fmt.Errorf("not enough coind - need %v, but hanve only %v", amount, balance)
+		return db.InvalidRequestError{Message: fmt.Sprintf("not enough coind - need %v, but hanve only %v", amount, balance)}
 	}
 
 	res, err := tx.Exec(`UPDATE employees SET balance=balance-$1 WHERE username=$2`, amount, fromUsername)
@@ -169,6 +185,12 @@ func (r *InfoRepository) SendCoins(ctx context.Context, fromUsername, toUsername
 
 	res, err = tx.Exec(`INSERT INTO coin_transactions (from_employee, to_employee, amount, date) VALUES ($1, $2, $3, $4)`,
 		fromUsername, toUsername, amount, curDate)
+	var pgErr *pq.Error
+	if errors.As(err, &pgErr) && pgErr.Code == "23514" {
+		return db.InvalidRequestError{Message: fmt.Sprintf("failed to exec coin transaction: %w", pgErr)}
+	} else if err != nil {
+		return fmt.Errorf("failed to exec coin transaction: %w", err)
+	}
 
 	affected, err = res.RowsAffected()
 	if err != nil {

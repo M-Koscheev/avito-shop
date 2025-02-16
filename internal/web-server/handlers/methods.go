@@ -26,7 +26,7 @@ func (h *Handler) authenticateEmployee(c *gin.Context) {
 	slog.Info("authentication handler", "accepted", true)
 	var input db.AuthRequest
 	if err := c.BindJSON(&input); err != nil {
-		c.AbortWithError(400, fmt.Errorf("неверный запрос"))
+		c.AbortWithStatusJSON(400, fmt.Errorf("неверный запрос").Error())
 		return
 	}
 
@@ -34,10 +34,10 @@ func (h *Handler) authenticateEmployee(c *gin.Context) {
 	slog.Info("authentication handler", "token", token, "error", err)
 	var unauthorizeErr db.UnauthorizedError
 	if errors.As(err, &unauthorizeErr) {
-		c.AbortWithError(401, err)
+		c.AbortWithStatusJSON(401, err.Error())
 		return
 	} else if err != nil {
-		c.AbortWithError(500, err)
+		c.AbortWithStatusJSON(500, err.Error())
 		return
 	}
 
@@ -64,13 +64,17 @@ func (h *Handler) getInfo(c *gin.Context) {
 	slog.Info("get info handler", "accepted", true)
 	employeeUsername, err := getEmployeeUsername(c)
 	if err != nil {
-		c.AbortWithError(401, err)
+		c.AbortWithStatusJSON(401, err.Error())
 		return
 	}
 
 	info, err := h.Services.Info.EmployeeInfo(ctx, employeeUsername)
-	if err != nil {
-		c.AbortWithError(500, err)
+	var invalidErr db.InvalidRequestError
+	if errors.As(err, &invalidErr) {
+		c.AbortWithStatusJSON(400, err.Error())
+		return
+	} else if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
 		return
 	}
 
@@ -94,19 +98,23 @@ func (h *Handler) sendCoin(c *gin.Context) {
 	slog.Info("send info handler", "accepted", true)
 	employeeUsername, err := getEmployeeUsername(c)
 	if err != nil {
-		c.AbortWithError(401, err)
+		c.AbortWithStatusJSON(401, err.Error())
 		return
 	}
 
 	var req db.SendCoinRequest
 	if err = c.BindJSON(&req); err != nil {
-		c.AbortWithError(400, fmt.Errorf("error getting input body from request"))
+		c.AbortWithStatusJSON(400, fmt.Errorf("error getting input body from request").Error())
 		return
 	}
 
 	err = h.Services.Info.SendCoin(ctx, employeeUsername, req.ToUser, req.Amount)
-	if err != nil {
-		c.AbortWithError(500, err)
+	var invalidErr db.InvalidRequestError
+	if errors.As(err, &invalidErr) {
+		c.AbortWithStatusJSON(400, err.Error())
+		return
+	} else if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
 		return
 	}
 
@@ -130,19 +138,23 @@ func (h *Handler) buyMerch(c *gin.Context) {
 	slog.Info("buy merch handler", "accepted", true)
 	employeeUsername, err := getEmployeeUsername(c)
 	if err != nil {
-		c.AbortWithError(401, err)
+		c.AbortWithStatusJSON(401, err.Error())
 		return
 	}
 
-	var merch db.Merch
-	if err = c.BindJSON(&merch); err != nil {
-		c.AbortWithError(400, fmt.Errorf("error getting input body from request"))
+	merch, err := db.ParseMerch(c.Param("item"))
+	if err != nil {
+		c.AbortWithStatusJSON(400, err.Error())
 		return
 	}
 
 	err = h.Services.Info.BuyMerch(ctx, employeeUsername, merch)
-	if err != nil {
-		c.AbortWithError(500, err)
+	var invalidErr db.InvalidRequestError
+	if errors.As(err, &invalidErr) {
+		c.AbortWithStatusJSON(400, err.Error())
+		return
+	} else if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
 		return
 	}
 

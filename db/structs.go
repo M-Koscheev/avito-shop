@@ -1,6 +1,9 @@
 package db
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type Merch string
 
@@ -16,6 +19,29 @@ const (
 	Wallet    Merch = "wallet"
 	PinkHoody Merch = "pink-hoody"
 )
+
+var merchMap = map[Merch]struct{}{
+	TShirt:    {},
+	Cup:       {},
+	Book:      {},
+	Pen:       {},
+	Powerbank: {},
+	Hoody:     {},
+	Umbrella:  {},
+	Socks:     {},
+	Wallet:    {},
+	PinkHoody: {},
+}
+
+func ParseMerch(given string) (Merch, error) {
+	merch := Merch(given)
+	_, ok := merchMap[merch]
+	if !ok {
+		return "", fmt.Errorf("invalid merch title given")
+	}
+
+	return merch, nil
+}
 
 const (
 	TokenTTL = 12 * time.Hour
@@ -76,5 +102,13 @@ type UnauthorizedError struct {
 }
 
 func (e UnauthorizedError) Error() string {
+	return e.Message
+}
+
+type InvalidRequestError struct {
+	Message string
+}
+
+func (e InvalidRequestError) Error() string {
 	return e.Message
 }

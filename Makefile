@@ -7,7 +7,7 @@ update:
 	docker compose pull avito-shop-service
 
 run:
-	docker compose up avito-shop-service -d
+	docker compose up avito-shop-service -d && /bin/bash -c "./create_products.sh"
 
 test:
 	go test -v ./...
@@ -16,7 +16,7 @@ migrateup:
 	migrate -path db/migrations -database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}?sslmode=disable -verbose up
 
 migratedown:
-	migrate -path db/migrations -database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}?sslmode=disable -verbose up
+	migrate -path db/migrations -database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}?sslmode=disable -verbose down
 
 fixmigrate:
 	migrate -path db/migrations -database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}?sslmode=disable force 1

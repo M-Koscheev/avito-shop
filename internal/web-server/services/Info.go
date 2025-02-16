@@ -20,7 +20,7 @@ func NewInfoService(infoRepo repository.Repository, employeeRepo repository.Repo
 func (s *InfoService) BuyMerch(ctx context.Context, username string, merch db.Merch) error {
 	_, err := s.employeeRepo.GetEmployee(ctx, username)
 	if err != nil {
-		return fmt.Errorf("failed to get employee with given username: %w", err)
+		return db.InvalidRequestError{Message: fmt.Sprintf("failed to get employee with given username: %v", err)}
 	}
 
 	if err = s.infoRepo.PurchaseProduct(ctx, username, merch); err != nil {
@@ -36,7 +36,7 @@ func (s *InfoService) SendCoin(ctx context.Context, fromUsername, toUsername str
 		wg.Go(func() error {
 			_, err := s.employeeRepo.GetEmployee(ctx, username)
 			if err != nil {
-				return fmt.Errorf("failed to get employee with given username: %w", err)
+				return db.InvalidRequestError{Message: fmt.Sprintf("failed to get employee with given username: %v", err)}
 			}
 
 			return nil
@@ -55,11 +55,6 @@ func (s *InfoService) SendCoin(ctx context.Context, fromUsername, toUsername str
 }
 
 func (s *InfoService) EmployeeInfo(ctx context.Context, username string) (db.InfoResponse, error) {
-	_, err := s.employeeRepo.GetEmployee(ctx, username)
-	if err != nil {
-		return db.InfoResponse{}, fmt.Errorf("failed to get employee with given username: %w", err)
-	}
-
 	info := db.InfoResponse{}
 	employee, err := s.employeeRepo.GetEmployee(ctx, username)
 	if err != nil {
